@@ -1,6 +1,6 @@
 <template>
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-12">
       <div class="card mb-2">
         <div class="card-body">
           <div class="card-title">{{ cardTitle }}</div>
@@ -8,14 +8,19 @@
         </div>
       </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-12">
       <div class="d-flex gap-2 js-step-container">
-        <div v-for="(item, index) in steps" :key="index" :data-step-id="index" class="card js-step-card" :class="isLastCard(index)">
+        <div 
+          v-for="(item, index) in steps" 
+          :key="item.question" 
+          :data-step-id="index" 
+          class="card js-step-card" 
+          :class="isLastCard(index)">
           <div class="card-body">
             <div class="card-title">{{ item.question }}</div>
-            <div class="d-flex gap-2">
-              <button v-for="(answer, answerIndex) in item.answers" :key="answerIndex" @click="btnClick($event, answer)" class="btn btn-outline-primary" type="button">{{ answer.text }}</button>
-            </div>
+            <step-btn 
+              :answers="item.answers" 
+              @next-step="loadStep" />
           </div>
         </div>
       </div>
@@ -26,11 +31,15 @@
 <script>
 // import StepBtn from './StepBtn.vue';
 import { settings } from '../vaiables/global-settings.js';
+import StepBtn from './StepBtn.vue';
 import getDecisionTreeData from '../modules/get-decision-tree-data.js';
 
 export default {
   name: "BranchSteps",
   props: ['branch'],
+  components: {
+    StepBtn
+  },
   computed: {
     cardTitle: function() {
       return settings.branchContent[this.branch].title;
@@ -49,31 +58,6 @@ export default {
     }
   },
   methods: {
-    btnClick(event, item) {
-      console.log("button click");
-
-      let clickedBtn = event.target,
-        activeBtns = clickedBtn.parentNode.getElementsByClassName('active'),
-        lastStep = false,
-        ids = item.next;
-
-      //is it the last step
-      if ( item.solution !== undefined) {
-        lastStep = true;
-        ids = item.solution;
-      }
-      
-      //remove active class from all buttons
-      for ( let i = 0; i < activeBtns.length; i++ ) {
-        activeBtns[i].classList.remove('active');
-      }
-
-      //add active class to clicked button
-      clickedBtn.classList.add('active');
-
-      //pass next step id to parent component
-      this.loadStep(clickedBtn, ids, lastStep);
-    },
     loadStep(btn, nextStep, lastStep) {
       let card = btn.closest(".js-step-card"),
         stepCount = parseInt(card.dataset.stepId) + 1,
@@ -111,6 +95,12 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+  .d-flex.js-step-container {
+    flex-wrap: wrap;
+  }
 
+  .card {
+    flex: 1 1 49%;
+  }
 </style>
