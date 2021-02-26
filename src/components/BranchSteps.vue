@@ -37,6 +37,7 @@ import getDecisionTreeData from '../modules/get-decision-tree-data.js';
 export default {
   name: "BranchSteps",
   props: ['branch'],
+  emits: ['results'],
   components: {
     StepBtn
   },
@@ -83,6 +84,7 @@ export default {
         this.steps.push(getDecisionTreeData(this.branch, nextStep));
       } else {
         console.log("Load Results " + nextStep);
+        this.$emit('results', nextStep);
       }
     },
     isLastCard(index) {
